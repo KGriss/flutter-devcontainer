@@ -1,12 +1,8 @@
-Voici le fichier `README.md` complet. Copie-le tel quel à la racine de ton projet.
-
----
-
 # 🐦 Flutter Android DevContainer
 
-Environnement de développement Flutter Android conteneurisé pour **Windows 10/11 + WSL2 + Docker Engine**.
+Ce `.devcontainer` a été conçu par Qwen3.8-Max pour fonctionner sur un hôte **Windows 10**, avec **WSL2** dans lequel est installé **Docker CE**.
 
-Compilation dans un conteneur Linux, tests sur émulateur Windows ou téléphone physique Android.
+Il permet le développement sur **Android**, via un **émulateur** lancé depuis/sur l'hôte Windows ou via un **téléphone physique** (ADB), soit en USB, soit en WI-FI.
 
 ---
 
