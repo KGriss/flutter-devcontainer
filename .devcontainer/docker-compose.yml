@@ -1,0 +1,19 @@
+services:
+  flutter:
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+    command: sleep infinity
+    init: true
+    working_dir: /workspace
+    network_mode: host
+    volumes:
+      - ..:/workspace:cached
+      - pub-cache:/home/vscode/.pub-cache
+      - gradle-cache:/home/vscode/.gradle
+      - android-home:/home/vscode/.android
+
+volumes:
+  pub-cache:
+  gradle-cache:
+  android-home:

@@ -1,0 +1,22 @@
+{
+  "name": "flutter-android-wsl",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "flutter",
+  "workspaceFolder": "/workspace",
+  "remoteUser": "vscode",
+  "shutdownAction": "stopCompose",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "Dart-Code.flutter",
+        "Dart-Code.dart-code"
+      ],
+      "settings": {
+        "dart.flutterSdkPath": "/opt/flutter",
+        "terminal.integrated.defaultProfile.linux": "bash"
+      }
+    }
+  },
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "hostRequirements": { "cpus": 4, "memory": "8gb", "storage": "30gb" }
+}
