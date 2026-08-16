@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/devcontainers/base:debian13
+FROM mcr.microsoft.com/devcontainers/base:debian-13
 
 ARG ANDROID_CMDLINE_TOOLS_VERSION=11076708
 ARG FLUTTER_CHANNEL=stable
@@ -6,14 +6,14 @@ ARG FLUTTER_CHANNEL=stable
 ENV DEBIAN_FRONTEND=noninteractive \
     FLUTTER_HOME=/opt/flutter \
     ANDROID_HOME=/opt/android-sdk \
-    JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 \
+    JAVA_HOME=/usr/lib/jvm/default-java \
     PATH="/opt/flutter/bin:/opt/flutter/bin/cache/dart-sdk/bin:/opt/android-sdk/cmdline-tools/latest/bin:/opt/android-sdk/platform-tools:/opt/android-sdk/emulator:${PATH}"
 
 USER root
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates curl git wget unzip xz-utils zip sudo \
-    openjdk-17-jdk-headless \
+    default-jdk-headless \
     libgl1 libglu1-mesa libgbm1 libnss3 libpulse0 libsdl2-2.0-0 \
     libx11-6 libx11-xcb1 libxcb1 libxext6 libxi6 libxkbcommon0 \
     libxrender1 libxtst6 \
