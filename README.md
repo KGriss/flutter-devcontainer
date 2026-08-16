@@ -1,5 +1,7 @@
 # 🐦 Flutter Android DevContainer
 
+(_🇫🇷 French version available_)
+
 This `.devcontainer` has been designed by **Qwen3.8-Max** in order to run on a **Windows 10** host with **WSL2**, and **Docker CE** installed on it.
 
 It supports **Android** development, with testing on an **emulator** running on the Windows host or on a **physical device** via ADB over USB or Wi-Fi.
