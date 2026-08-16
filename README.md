@@ -1,40 +1,40 @@
 # 🐦 Flutter Android DevContainer
 
-Ce `.devcontainer` a été conçu par Qwen3.8-Max pour fonctionner sur un hôte **Windows 10**, avec **WSL2** dans lequel est installé **Docker CE**.
+This `.devcontainer` has been designed by **Qwen3.8-Max** in order to run on a **Windows 10** host with **WSL2**, and **Docker CE** installed on it.
 
-Il permet le développement sur **Android**, via un **émulateur** lancé depuis/sur l'hôte Windows ou via un **téléphone physique** (ADB), soit en USB, soit en WI-FI.
+It supports **Android** development, with testing on an **emulator** running on the Windows host or on a **physical device** via ADB over USB or Wi-Fi.
 
 ---
 
-## 📑 Sommaire
+## 📑 Table of Contents
 
-- [Ce que fait ce DevContainer](#-ce-que-fait-ce-devcontainer)
+- [What This DevContainer Does](#-what-this-devcontainer-does)
 - [Architecture](#️-architecture)
-- [Prérequis](#-prérequis)
+- [Prerequisites](#-prerequisites)
 - [Installation](#-installation)
-- [Utilisation quotidienne](#-utilisation-quotidienne)
-- [Structure du projet](#-structure-du-projet)
-- [Commandes utiles](#️-commandes-utiles)
-- [Diagnostic](#-diagnostic)
-- [Dépannage](#-dépannage)
-- [Personnalisation](#️-personnalisation)
-- [Limites connues](#-limites-connues)
+- [Daily Usage](#-daily-usage)
+- [Project Structure](#-project-structure)
+- [Useful Commands](#️-useful-commands)
+- [Diagnostics](#-diagnostics)
+- [Troubleshooting](#-troubleshooting)
+- [Customization](#️-customization)
+- [Known Limitations](#-known-limitations)
 
 ---
 
-## 🎯 Ce que fait ce DevContainer
+## 🎯 What This DevContainer Does
 
-| Fonctionnalité | Supportée |
+| Feature | Supported |
 |---|---|
-| Développement Flutter Android | ✅ |
+| Flutter Android development | ✅ |
 | Build APK / AAB | ✅ |
 | Hot reload / Hot restart | ✅ |
-| Test sur téléphone physique Android (USB) | ✅ |
-| Test sur téléphone physique Android (Wi-Fi) | ✅ |
-| Test sur émulateur Android (lancé depuis Windows) | ✅ |
-| Tests unitaires (`flutter test`) | ✅ |
-| Analyse statique (`flutter analyze`) | ✅ |
-| Flutter Web (debug interactif) | ❌ |
+| Testing on physical Android device (USB) | ✅ |
+| Testing on physical Android device (Wi-Fi) | ✅ |
+| Testing on Android emulator (launched from Windows) | ✅ |
+| Unit tests (`flutter test`) | ✅ |
+| Static analysis (`flutter analyze`) | ✅ |
+| Flutter Web (interactive debugging) | ❌ |
 | Flutter Desktop (Linux / Windows / macOS) | ❌ |
 | Flutter iOS | ❌ |
 
@@ -44,112 +44,112 @@ Il permet le développement sur **Android**, via un **émulateur** lancé depuis
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                   CONTENEUR DOCKER                       │
+│                   DOCKER CONTAINER                       │
 │                                                         │
 │  ┌───────────┐   ┌──────────────┐   ┌───────────────┐  │
 │  │  Flutter  │   │ Android SDK  │   │  ADB client   │  │
 │  │   (Dart)  │   │ (compilation)│   │  (wrapper)    │  │
 │  └─────┬─────┘   └──────────────┘   └───────┬───────┘  │
 │        │                                     │          │
-│        │  Compilation APK                    │          │
+│        │  APK Compilation                    │          │
 │        └─────────────────────────────────────┘          │
 └────────────────────────┬────────────────────────────────┘
-                         │  Pont ADB (port 5037)
+                         │  ADB Bridge (port 5037)
                          │  network_mode: host
 ┌────────────────────────▼────────────────────────────────┐
 │                    WSL2 (Debian)                         │
-│           Réseau partagé avec le conteneur               │
+│           Network shared with the container              │
 └────────────────────────┬────────────────────────────────┘
-                         │  Réseau virtuel Hyper-V
+                         │  Hyper-V Virtual Network
 ┌────────────────────────▼────────────────────────────────┐
 │                      WINDOWS                             │
 │   ┌─────────────────────────────────────────────────┐   │
-│   │          Serveur ADB (0.0.0.0:5037)             │   │
+│   │          ADB Server (0.0.0.0:5037)              │   │
 │   └──────────┬──────────────────────┬───────────────┘   │
 │              │                      │                   │
 │      ┌───────▼────────┐    ┌───────▼────────┐          │
-│      │   Émulateur    │    │ Téléphone USB  │          │
-│      │(Android Studio)│    │  ou Wi-Fi      │          │
+│      │   Emulator     │    │  Phone via USB │          │
+│      │(Android Studio)│    │  or Wi-Fi      │          │
 │      └────────────────┘    └────────────────┘          │
 └─────────────────────────────────────────────────────────┘
 ```
 
-**Principe clé :** le conteneur compile le code Flutter et produit un APK. Le déploiement sur l'appareil (émulateur ou téléphone) se fait via un **pont ADB** vers le serveur ADB qui tourne sur Windows. Le conteneur n'a pas besoin d'accéder directement à l'USB ou au GPU.
+**Key principle:** the container compiles the Flutter code and produces an APK. Deployment to the device (emulator or phone) is done via an **ADB bridge** to the ADB server running on Windows. The container does not need direct access to USB or GPU.
 
 ---
 
-## ✅ Prérequis
+## ✅ Prerequisites
 
-### Sur Windows
+### On Windows
 
-| Logiciel | Version minimale | Vérification |
+| Software | Minimum Version | Verification |
 |---|---|---|
-| Windows 10 21H2+ ou Windows 11 | Build 19045+ | `winver` |
-| WSL2 | Activé | `wsl -l -v` |
-| Docker Engine (dans WSL) | 24+ | `docker version` dans WSL |
-| Android Studio | 2023+ | Pour gérer les AVD |
-| Android SDK Platform-Tools | 34+ | Inclus avec Android Studio |
-| VS Code | Dernière version | `code --version` |
+| Windows 10 21H2+ or Windows 11 | Build 19045+ | `winver` |
+| WSL2 | Enabled | `wsl -l -v` |
+| Docker Engine (inside WSL) | 24+ | `docker version` in WSL |
+| Android Studio | 2023+ | For managing AVDs |
+| Android SDK Platform-Tools | 34+ | Bundled with Android Studio |
+| VS Code | Latest version | `code --version` |
 
-### Extensions VS Code (sur Windows)
+### VS Code Extensions (on Windows)
 
-Installez ces extensions depuis le Marketplace VS Code :
+Install these extensions from the VS Code Marketplace:
 
 - **WSL** (Microsoft)
 - **Dev Containers** (Microsoft)
 - **Flutter** (Dart Code)
 - **Dart** (Dart Code)
 
-### Sur WSL
+### Inside WSL
 
-| Élément | Vérification |
+| Element | Verification |
 |---|---|
-| Distribution WSL2 | `wsl -l -v` → VERSION doit être `2` |
-| Docker Engine fonctionnel | `docker ps` sans erreur |
-| Utilisateur dans le groupe `docker` | `docker ps` sans `sudo` |
+| WSL2 distribution | `wsl -l -v` → VERSION must be `2` |
+| Docker Engine working | `docker ps` without errors |
+| User in the `docker` group | `docker ps` without `sudo` |
 
 ---
 
 ## 📦 Installation
 
-### 1. Configuration de l'hôte Windows
+### 1. Windows Host Configuration
 
-#### 1.1. Vérifier qu'Android Studio et les AVD sont prêts
+#### 1.1. Verify Android Studio and AVDs are ready
 
-Ouvrez **Android Studio** → **Device Manager** → vérifiez qu'au moins un AVD existe. Si ce n'est pas le cas, créez-en un (ex : Pixel 7, API 34).
+Open **Android Studio** → **Device Manager** → verify that at least one AVD exists. If not, create one (e.g., Pixel 7, API 34).
 
-#### 1.2. Configurer le serveur ADB en écoute globale
+#### 1.2. Configure the ADB server for global listening
 
-Le serveur ADB doit écouter sur **toutes les interfaces réseau** (pas uniquement localhost) pour que le conteneur puisse s'y connecter.
+The ADB server must listen on **all network interfaces** (not just localhost) so the container can connect to it.
 
-Ouvrez **PowerShell** (pas WSL) :
+Open **PowerShell** (not WSL):
 
 ```powershell
-# Se rendre dans le dossier platform-tools
+# Navigate to the platform-tools directory
 cd $env:LOCALAPPDATA\Android\Sdk\platform-tools
 
-# Tuer le serveur existant
+# Kill the existing server
 .\adb.exe kill-server
 
-# Démarrer en écoute globale
+# Start with global listening
 .\adb.exe -a -P 5037 start-server
 
-# Vérifier qu'il écoute bien sur 0.0.0.0
+# Verify it's listening on 0.0.0.0
 netstat -an | findstr "5037"
 ```
 
-✅ Résultat attendu :
+✅ Expected output:
 
 ```
 TCP    0.0.0.0:5037    0.0.0.0:0    LISTENING
 ```
 
-> ⚠️ Si vous voyez `127.0.0.1:5037` au lieu de `0.0.0.0:5037`, le serveur n'écoute que sur localhost. Relancez avec `.\adb.exe -a start-server`.
+> ⚠️ If you see `127.0.0.1:5037` instead of `0.0.0.0:5037`, the server is only listening on localhost. Restart with `.\adb.exe -a start-server`.
 
-#### 1.3. Autoriser le port 5037 dans le pare-feu Windows
+#### 1.3. Allow port 5037 through the Windows Firewall
 
 ```powershell
-# PowerShell en mode Administrateur
+# PowerShell in Administrator mode
 New-NetFirewallRule -DisplayName "WSL ADB Bridge" `
   -Direction Inbound `
   -Profile Any `
@@ -158,44 +158,44 @@ New-NetFirewallRule -DisplayName "WSL ADB Bridge" `
   -Action Allow
 ```
 
-#### 1.4. Vérifier que l'appareil est connecté
+#### 1.4. Verify the device is connected
 
 ```powershell
-# Téléphone branché en USB
+# Phone plugged in via USB
 .\adb.exe devices
 ```
 
-✅ Résultat attendu :
+✅ Expected output:
 
 ```
 List of devices attached
 XXXXXXXXXXXX    device
 ```
 
-Si vous voyez `unauthorized`, déverrouillez votre téléphone et acceptez l'invite « Autoriser le débogage USB ».
+If you see `unauthorized`, unlock your phone and accept the "Allow USB debugging" prompt.
 
 ---
 
-### 2. Configuration de WSL
+### 2. WSL Configuration
 
-#### 2.1. Vérifier que Docker fonctionne sans sudo
+#### 2.1. Verify Docker works without sudo
 
 ```bash
 docker ps
 ```
 
-Si vous obtenez `permission denied`, ajoutez votre utilisateur au groupe `docker` :
+If you get `permission denied`, add your user to the `docker` group:
 
 ```bash
 sudo usermod -aG docker $USER
 newgrp docker
 ```
 
-#### 2.2. (Optionnel) Limiter la RAM de WSL
+#### 2.2. (Optional) Limit WSL RAM usage
 
-Si votre machine a 8 Go de RAM ou moins, créez un fichier `.wslconfig` pour éviter que WSL ne consomme toute la mémoire.
+If your machine has 8 GB of RAM or less, create a `.wslconfig` file to prevent WSL from consuming all available memory.
 
-Sur Windows, créez le fichier `C:\Users\<votre_utilisateur>\.wslconfig` :
+On Windows, create the file `C:\Users\<your_username>\.wslconfig`:
 
 ```ini
 [wsl2]
@@ -204,7 +204,7 @@ processors=2
 swap=2GB
 ```
 
-Puis dans PowerShell :
+Then in PowerShell:
 
 ```powershell
 wsl --shutdown
@@ -212,241 +212,241 @@ wsl --shutdown
 
 ---
 
-### 3. Configuration du projet
+### 3. Project Configuration
 
-#### 3.1. Créer ou ouvrir le projet dans WSL
+#### 3.1. Create or open the project inside WSL
 
-> ⚠️ **Le projet DOIT être dans le système de fichiers Linux** (`~/`), pas sur le disque Windows (`/mnt/c/`). Les performances seraient dégradées par un facteur 5 à 10.
+> ⚠️ **The project MUST be inside the Linux filesystem** (`~/`), not on the Windows drive (`/mnt/c/`). Performance would be degraded by a factor of 5 to 10.
 
 ```bash
 cd ~/dev
-mkdir mon_projet_flutter
-cd mon_projet_flutter
+mkdir my_flutter_project
+cd my_flutter_project
 ```
 
-#### 3.2. Vérifier la présence du dossier `.devcontainer`
+#### 3.2. Verify the `.devcontainer` folder is present
 
-Le dossier `.devcontainer` doit contenir :
+The `.devcontainer` folder must contain:
 
 ```
 .devcontainer/
-├── devcontainer.json       # Config VS Code / DevContainer
-├── docker-compose.yml      # Config Docker Compose (network_mode: host)
-├── Dockerfile              # Image : Flutter + Android SDK + JDK
-└── post-create.sh          # Script post-création (pont ADB, permissions)
+├── devcontainer.json       # VS Code / DevContainer config
+├── docker-compose.yml      # Docker Compose config (network_mode: host)
+├── Dockerfile              # Image: Flutter + Android SDK + JDK
+└── post-create.sh          # Post-creation script (ADB bridge, permissions)
 ```
 
-#### 3.3. Ouvrir dans VS Code
+#### 3.3. Open in VS Code
 
 ```bash
 code .
 ```
 
-VS Code s'ouvre connecté à WSL (indicateur `WSL: Debian` en bas à gauche).
+VS Code opens connected to WSL (indicator `WSL: Debian` in the bottom-left corner).
 
-#### 3.4. Construire le conteneur
+#### 3.4. Build the container
 
-Dans VS Code :
+In VS Code:
 
 1. `Ctrl + Shift + P`
 2. **`Dev Containers: Rebuild Container`**
 
-Le premier build prend **15 à 30 minutes** (téléchargement de Flutter, Android SDK, JDK, Gradle, etc.). Les builds suivants utilisent le cache Docker.
+The first build takes **15 to 30 minutes** (downloading Flutter, Android SDK, JDK, Gradle, etc.). Subsequent builds use the Docker cache.
 
 ---
 
-## 🚀 Utilisation quotidienne
+## 🚀 Daily Usage
 
-### Démarrer le conteneur
+### Start the container
 
 ```bash
-# Dans WSL
-cd ~/dev/mon_projet_flutter
+# In WSL
+cd ~/dev/my_flutter_project
 code .
 ```
 
-Puis dans VS Code : `Ctrl+Shift+P` → **`Dev Containers: Reopen in Container`**.
+Then in VS Code: `Ctrl+Shift+P` → **`Dev Containers: Reopen in Container`**.
 
-### Vérifier que tout fonctionne
+### Verify everything works
 
-Dans le terminal du conteneur :
+In the container terminal:
 
 ```bash
-# Vérifier Flutter
+# Check Flutter
 flutter doctor -v
 
-# Vérifier le pont ADB
+# Check the ADB bridge
 adb devices
 ```
 
-✅ `flutter doctor` doit montrer Flutter, Android SDK, et JDK sans erreur.
-✅ `adb devices` doit lister vos appareils connectés (émulateur et/ou téléphone).
+✅ `flutter doctor` should show Flutter, Android SDK, and JDK without errors.
+✅ `adb devices` should list your connected devices (emulator and/or phone).
 
-### Lancer sur émulateur Android
+### Run on Android emulator
 
-1. Sur Windows, ouvrez **Android Studio** → **Device Manager** → lancez un AVD.
-2. Vérifiez que le serveur ADB Windows tourne :
+1. On Windows, open **Android Studio** → **Device Manager** → launch an AVD.
+2. Verify the Windows ADB server is running:
    ```powershell
    cd $env:LOCALAPPDATA\Android\Sdk\platform-tools
    .\adb.exe devices
    ```
-3. Dans le conteneur :
+3. In the container:
    ```bash
-   flutter devices          # l'émulateur doit apparaître
-   flutter run              # lance l'app sur l'émulateur
+   flutter devices          # the emulator should appear
+   flutter run              # launch the app on the emulator
    ```
 
-### Lancer sur téléphone physique (USB)
+### Run on physical device (USB)
 
-1. Branchez votre téléphone en USB sur le PC Windows.
-2. Acceptez l'invite « Autoriser le débogage USB » sur le téléphone.
-3. Vérifiez côté Windows :
+1. Plug your phone into the Windows PC via USB.
+2. Accept the "Allow USB debugging" prompt on the phone.
+3. Verify on Windows:
    ```powershell
    .\adb.exe devices
    ```
-4. Dans le conteneur :
+4. In the container:
    ```bash
    flutter devices
    flutter run
    ```
 
-### Lancer sur téléphone physique (Wi-Fi)
+### Run on physical device (Wi-Fi)
 
-#### Android 11 et supérieur
+#### Android 11 and above
 
-1. Sur le téléphone : **Paramètres → Options développeur → Débogage sans fil**.
-2. Activez le débogage sans fil.
-3. Appuyez sur **« Associer l'appareil avec un code d'association »**.
-4. Notez l'IP, le port et le code affichés.
-5. Dans le conteneur :
+1. On the phone: **Settings → Developer options → Wireless debugging**.
+2. Enable wireless debugging.
+3. Tap **"Pair device with pairing code"**.
+4. Note the IP address, port, and code displayed.
+5. In the container:
    ```bash
-   adb pair IP_TELEPHONE:PORT_PAIRING
-   # Entrez le code d'association
-   adb connect IP_TELEPHONE:PORT_CONNEXION
+   adb pair PHONE_IP:PAIRING_PORT
+   # Enter the pairing code
+   adb connect PHONE_IP:CONNECTION_PORT
    adb devices
    flutter run
    ```
 
-#### Android 10 et inférieur
+#### Android 10 and below
 
-Android 10 n'a pas le « Débogage sans fil » natif. Il faut une première connexion USB :
+Android 10 does not have native "Wireless debugging". An initial USB connection is required:
 
-1. Branchez le téléphone en USB.
-2. Dans le conteneur :
+1. Plug the phone in via USB.
+2. In the container:
    ```bash
    adb tcpip 5555
    ```
-3. Débranchez le câble USB.
-4. Trouvez l'IP du téléphone (**Paramètres → À propos → État → Adresse IP**).
-5. Dans le conteneur :
+3. Unplug the USB cable.
+4. Find the phone's IP address (**Settings → About phone → Status → IP address**).
+5. In the container:
    ```bash
-   adb connect IP_TELEPHONE:5555
+   adb connect PHONE_IP:5555
    adb devices
    flutter run
    ```
 
-### Arrêter le conteneur
+### Stop the container
 
-- Fermez simplement la fenêtre VS Code, ou
+- Simply close the VS Code window, or
 - `Ctrl+Shift+P` → **`Dev Containers: Close Remote Connection`**
 
-Le conteneur est arrêté automatiquement (`shutdownAction: stopCompose`).
+The container is stopped automatically (`shutdownAction: stopCompose`).
 
 ---
 
-## 📁 Structure du projet
+## 📁 Project Structure
 
 ```
-mon_projet_flutter/
+my_flutter_project/
 ├── .devcontainer/
-│   ├── devcontainer.json       # Config VS Code / DevContainer
+│   ├── devcontainer.json       # VS Code / DevContainer config
 │   ├── docker-compose.yml      # Docker Compose (network_mode: host)
-│   ├── Dockerfile              # Image Linux (Flutter + SDK + JDK)
-│   └── post-create.sh          # Script post-création (pont ADB)
+│   ├── Dockerfile              # Linux image (Flutter + SDK + JDK)
+│   └── post-create.sh          # Post-creation script (ADB bridge)
 ├── lib/
-│   └── main.dart               # Point d'entrée de l'application
+│   └── main.dart               # Application entry point
 ├── android/
-│   ├── app/                    # Code natif Android
-│   ├── gradle/                 # Config Gradle
-│   └── gradle.properties       # Arguments JVM Gradle
-├── test/                       # Tests unitaires
-├── pubspec.yaml                # Dépendances Flutter
-└── README.md                   # Ce fichier
+│   ├── app/                    # Native Android code
+│   ├── gradle/                 # Gradle configuration
+│   └── gradle.properties       # Gradle JVM arguments
+├── test/                       # Unit tests
+├── pubspec.yaml                # Flutter dependencies
+└── README.md                   # This file
 ```
 
-### Rôle des fichiers `.devcontainer`
+### Role of `.devcontainer` files
 
-| Fichier | Rôle |
+| File | Role |
 |---|---|
-| `devcontainer.json` | Définit le nom du conteneur, les extensions VS Code, les paramètres, le script post-création |
-| `docker-compose.yml` | Définit le service Docker, le `network_mode: host`, les volumes persistants |
-| `Dockerfile` | Construit l'image Linux : Flutter stable, Android SDK 34/35, JDK 17, outils ADB |
-| `post-create.sh` | Exécuté après la création du conteneur : configure le pont ADB, accepte les licences, fixe les permissions |
+| `devcontainer.json` | Defines the container name, VS Code extensions, settings, and post-creation script |
+| `docker-compose.yml` | Defines the Docker service, `network_mode: host`, and persistent volumes |
+| `Dockerfile` | Builds the Linux image: Flutter stable, Android SDK 34/35, JDK 17, ADB tools |
+| `post-create.sh` | Executed after container creation: configures the ADB bridge, accepts licenses, fixes permissions |
 
 ---
 
-## 🛠️ Commandes utiles
+## 🛠️ Useful Commands
 
 ### Flutter
 
 ```bash
-flutter create --platforms=android .   # Initialiser un projet Flutter
-flutter pub get                        # Télécharger les dépendances
-flutter run                            # Lancer l'app
-flutter run -d <device_id>             # Lancer sur un appareil précis
-flutter run --release                  # Lancer en mode release
-flutter build apk --debug              # Builder un APK debug
-flutter build apk --release            # Builder un APK release
-flutter build appbundle --release      # Builder un AAB (Play Store)
-flutter clean                          # Nettoyer les artefacts de build
-flutter analyze                        # Analyser le code
-flutter test                           # Lancer les tests unitaires
-flutter doctor -v                      # Diagnostic complet
-flutter upgrade                        # Mettre à jour Flutter
+flutter create --platforms=android .   # Initialize a Flutter project
+flutter pub get                        # Download dependencies
+flutter run                            # Launch the app
+flutter run -d <device_id>             # Launch on a specific device
+flutter run --release                  # Launch in release mode
+flutter build apk --debug              # Build a debug APK
+flutter build apk --release            # Build a release APK
+flutter build appbundle --release      # Build an AAB (Play Store)
+flutter clean                          # Clean build artifacts
+flutter analyze                        # Analyze the code
+flutter test                           # Run unit tests
+flutter doctor -v                      # Full diagnostics
+flutter upgrade                        # Update Flutter
 ```
 
-### ADB (dans le conteneur)
+### ADB (inside the container)
 
 ```bash
-adb devices                            # Lister les appareils
-adb devices -l                         # Lister avec détails
-adb install mon_app.apk                # Installer un APK
-adb logcat                             # Logs en temps réel
-adb logcat -s flutter                  # Filtrer les logs Flutter
-adb shell                              # Shell sur l'appareil
-adb reboot                             # Redémarrer l'appareil
-adb connect IP:PORT                    # Connexion Wi-Fi
-adb pair IP:PORT                       # Association (Android 11+)
+adb devices                            # List devices
+adb devices -l                         # List with details
+adb install my_app.apk                 # Install an APK
+adb logcat                             # Real-time logs
+adb logcat -s flutter                  # Filter Flutter logs
+adb shell                              # Shell on the device
+adb reboot                             # Reboot the device
+adb connect IP:PORT                    # Wi-Fi connection
+adb pair IP:PORT                       # Pairing (Android 11+)
 ```
 
 ### Docker
 
 ```bash
-docker ps                              # Conteneurs en cours
-docker ps -a                           # Tous les conteneurs
-docker logs <id>                       # Logs d'un conteneur
-docker system prune                    # Nettoyer les ressources
-docker system df                       # Utilisation disque
+docker ps                              # Running containers
+docker ps -a                           # All containers
+docker logs <id>                       # Container logs
+docker system prune                    # Clean up unused resources
+docker system df                       # Disk usage
 ```
 
 ### WSL
 
 ```bash
-wsl -l -v                              # Lister les distributions
-wsl --shutdown                         # Arrêter WSL
-wsl --status                           # Statut global
+wsl -l -v                              # List distributions
+wsl --shutdown                         # Shut down WSL
+wsl --status                           # Global status
 ```
 
 ---
 
-## 🔍 Diagnostic
+## 🔍 Diagnostics
 
-### Script de diagnostic complet
+### Full diagnostic script
 
-Dans le conteneur :
+Inside the container:
 
 ```bash
-echo "=== ROUTE PAR DÉFAUT ==="
+echo "=== DEFAULT ROUTE ==="
 ip route show default
 
 echo ""
@@ -454,16 +454,16 @@ echo "=== RESOLV.CONF ==="
 cat /etc/resolv.conf
 
 echo ""
-echo "=== TEST PASSERELLE ==="
+echo "=== GATEWAY TEST ==="
 GW=$(ip route show default | awk '{print $3}' | head -1)
-echo "Passerelle détectée : $GW"
+echo "Detected gateway: $GW"
 timeout 3 bash -c "echo > /dev/tcp/$GW/5037" 2>/dev/null \
-  && echo "✅ Port 5037 accessible sur $GW" \
-  || echo "❌ Port 5037 INACCESSIBLE sur $GW"
+  && echo "✅ Port 5037 reachable on $GW" \
+  || echo "❌ Port 5037 UNREACHABLE on $GW"
 
 echo ""
-echo "=== WRAPPER ADB ==="
-cat /opt/android-sdk/platform-tools/adb 2>/dev/null || echo "Wrapper absent"
+echo "=== ADB WRAPPER ==="
+cat /opt/android-sdk/platform-tools/adb 2>/dev/null || echo "Wrapper missing"
 
 echo ""
 echo "=== ADB DEVICES ==="
@@ -474,7 +474,7 @@ echo "=== FLUTTER DOCTOR ==="
 flutter doctor -v 2>&1
 ```
 
-Sur Windows (PowerShell) :
+On Windows (PowerShell):
 
 ```powershell
 echo "=== NETSTAT ==="
@@ -486,124 +486,124 @@ cd $env:LOCALAPPDATA\Android\Sdk\platform-tools
 .\adb.exe devices
 
 echo ""
-echo "=== PARE-FEU ==="
+echo "=== FIREWALL ==="
 Get-NetFirewallRule -DisplayName "*WSL*" -ErrorAction SilentlyContinue |
   Format-Table DisplayName, Enabled, Direction, Action
 ```
 
 ---
 
-## 🔧 Dépannage
+## 🔧 Troubleshooting
 
 ### `cannot connect to daemon at tcp:127.0.0.11:5037`
 
-**Cause :** le wrapper ADB lit le DNS interne de Docker (`127.0.0.11`) au lieu de l'IP Windows.
+**Cause:** the ADB wrapper is reading Docker's internal DNS (`127.0.0.11`) instead of the Windows IP.
 
-**Solution :** vérifiez que `network_mode: host` est bien présent dans `docker-compose.yml` et que le `post-create.sh` utilise `ip route show default` pour détecter la passerelle.
+**Solution:** verify that `network_mode: host` is present in `docker-compose.yml` and that `post-create.sh` uses `ip route show default` to detect the gateway.
 
 ```yaml
 # docker-compose.yml
 services:
   flutter:
-    network_mode: host    # ← Cette ligne est indispensable
+    network_mode: host    # ← This line is essential
 ```
 
-Faites un **Rebuild Container** après modification.
+Perform a **Rebuild Container** after any modification.
 
 ---
 
-### `adb devices` retourne une liste vide dans le conteneur
+### `adb devices` returns an empty list inside the container
 
-Vérifiez dans cet ordre :
+Check in this order:
 
-1. Le serveur ADB Windows tourne avec l'option `-a` :
+1. The Windows ADB server is running with the `-a` flag:
    ```powershell
    netstat -an | findstr "5037"
-   # Doit afficher : TCP  0.0.0.0:5037  ...  LISTENING
+   # Should show: TCP  0.0.0.0:5037  ...  LISTENING
    ```
 
-2. L'appareil est bien connecté côté Windows :
+2. The device is connected on Windows:
    ```powershell
    .\adb.exe devices
    ```
 
-3. Le pare-feu Windows autorise le port 5037 :
+3. The Windows Firewall allows port 5037:
    ```powershell
    Get-NetFirewallRule -DisplayName "*WSL*"
    ```
 
-4. La passerelle est accessible depuis le conteneur :
+4. The gateway is reachable from the container:
    ```bash
    GW=$(ip route show default | awk '{print $3}' | head -1)
-   timeout 3 bash -c "echo > /dev/tcp/$GW/5037" 2>/dev/null && echo "OK" || echo "ECHEC"
+   timeout 3 bash -c "echo > /dev/tcp/$GW/5037" 2>/dev/null && echo "OK" || echo "FAIL"
    ```
 
 ---
 
-### Le build est très lent
+### Build is very slow
 
-- Vérifiez que le projet est dans `~/` (système Linux), **pas** dans `/mnt/c/`.
-- Le premier build Gradle est toujours long. Les suivants utilisent le cache.
-- Vérifiez que Docker a assez de ressources : `docker info | grep -i memory`.
+- Verify the project is inside `~/` (Linux filesystem), **not** inside `/mnt/c/`.
+- The first Gradle build is always slow. Subsequent builds use the cache.
+- Verify Docker has enough resources: `docker info | grep -i memory`.
 
 ---
 
-### `flutter doctor` signale des licences manquantes
+### `flutter doctor` reports missing licenses
 
 ```bash
 flutter doctor --android-licenses
 ```
 
-Acceptez toutes les licences en tapant `y`.
+Accept all licenses by typing `y`.
 
 ---
 
-### Le conteneur ne démarre pas après modification
+### Container does not start after modification
 
 ```
 Ctrl+Shift+P → Dev Containers: Rebuild Container
 ```
 
-Ne faites pas juste « Reopen » : un **Rebuild** est nécessaire après modification du `Dockerfile` ou du `docker-compose.yml`.
+Do not just "Reopen": a **Rebuild** is required after modifying the `Dockerfile` or `docker-compose.yml`.
 
 ---
 
-### `unauthorized` sur le téléphone
+### `unauthorized` on the phone
 
-- Déverrouillez l'écran du téléphone.
-- Une invite « Autoriser le débogage USB » devrait apparaître. Acceptez-la.
-- Si l'invite n'apparaît pas, débranchez/rebranchez le câble USB.
-- Sur Windows, vérifiez : `.\adb.exe devices` → l'appareil doit passer de `unauthorized` à `device`.
+- Unlock the phone screen.
+- A "Allow USB debugging" prompt should appear. Accept it.
+- If the prompt does not appear, unplug/replug the USB cable.
+- On Windows, verify: `.\adb.exe devices` → the device should change from `unauthorized` to `device`.
 
 ---
 
-## ⚙️ Personnalisation
+## ⚙️ Customization
 
-### Changer la version de Flutter
+### Change the Flutter version
 
-Dans le `Dockerfile`, modifiez l'argument `FLUTTER_CHANNEL` :
+In the `Dockerfile`, modify the `FLUTTER_CHANNEL` argument:
 
 ```dockerfile
-ARG FLUTTER_CHANNEL=stable    # ou beta, ou master
+ARG FLUTTER_CHANNEL=stable    # or beta, or master
 ```
 
-Pour une version précise, remplacez le clone par :
+For a specific version, replace the clone with:
 
 ```dockerfile
 RUN git clone --branch 3.24.0 https://github.com/flutter/flutter.git ${FLUTTER_HOME}
 ```
 
-### Changer la version d'Android SDK
+### Change the Android SDK version
 
-Dans le `Dockerfile`, modifiez la ligne `sdkmanager` :
+In the `Dockerfile`, modify the `sdkmanager` line:
 
 ```dockerfile
 RUN sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0" "emulator"
 ```
 
-### Ajouter le support Flutter Web
+### Add Flutter Web support
 
-Ajoutez dans le `Dockerfile` :
+Add to the `Dockerfile`:
 
 ```dockerfile
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -616,31 +616,31 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 ENV CHROME_EXECUTABLE=/usr/bin/chromium
 ```
 
-Puis : `flutter run -d chrome`
+Then: `flutter run -d chrome`
 
-### Utiliser ce devcontainer pour un nouveau projet
+### Use this devcontainer for a new project
 
-Copiez le dossier `.devcontainer` dans le nouveau projet :
+Copy the `.devcontainer` folder into the new project:
 
 ```bash
 cd ~/dev
-mkdir nouveau_projet
-cp -r ~/dev/mon_projet_flutter/.devcontainer nouveau_projet/
-cd nouveau_projet
+mkdir new_project
+cp -r ~/dev/my_flutter_project/.devcontainer new_project/
+cd new_project
 code .
 ```
 
-Puis : `Dev Containers: Reopen in Container` → `flutter create --platforms=android .`
+Then: `Dev Containers: Reopen in Container` → `flutter create --platforms=android .`
 
 ---
 
-## 📌 Limites connues
+## 📌 Known Limitations
 
-| Limite | Explication |
+| Limitation | Explanation |
 |---|---|
-| Pas de GPU dans le conteneur | Le conteneur n'a pas accès à la carte graphique. L'émulateur utilise le GPU via Windows. |
-| Pas de KVM dans WSL | L'émulateur ne peut pas tourner dans le conteneur. Il doit être lancé depuis Windows. |
-| Architecture x86_64 uniquement | Les images Android SDK et émulateur sont pour x86_64. |
-| Flutter Web non configuré | Pas de navigateur dans le conteneur. Le build web fonctionne (`flutter build web`), mais pas le debug interactif. |
-| Flutter Desktop / iOS non supporté | Nécessite des outils natifs (GTK, Xcode) non disponibles dans ce conteneur. |
-| Dépendance au serveur ADB Windows | Le conteneur dépend du serveur ADB qui tourne sur Windows. Si Windows redémarre, il faut relancer le serveur ADB avec `-a`. |
+| No GPU inside the container | The container does not have access to the graphics card. The emulator uses the GPU via Windows. |
+| No KVM inside WSL | The emulator cannot run inside the container. It must be launched from Windows. |
+| x86_64 architecture only | Android SDK images and emulator are for x86_64. |
+| Flutter Web not configured | No browser inside the container. Web build works (`flutter build web`), but interactive debugging does not. |
+| Flutter Desktop / iOS not supported | Requires native tools (GTK, Xcode) not available in this container. |
+| Dependency on the Windows ADB server | The container depends on the ADB server running on Windows. If Windows restarts, the ADB server must be restarted with `-a`. |
